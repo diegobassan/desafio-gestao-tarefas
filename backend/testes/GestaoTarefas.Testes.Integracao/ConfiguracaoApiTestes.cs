@@ -8,7 +8,7 @@ namespace GestaoTarefas.Testes.Integracao;
 public class ConfiguracaoApiTestes
 {
     [Fact]
-    public async Task DeveExporDocumentoOpenApiSemEndpointsDeNegocioEmDesenvolvimento()
+    public async Task DeveExporDocumentoOpenApiComEndpointsDeTarefasEmDesenvolvimento()
     {
         await using var aplicacao = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder => builder.UseEnvironment("Development"));
@@ -19,7 +19,15 @@ public class ConfiguracaoApiTestes
         Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
         using var documento = JsonDocument.Parse(await resposta.Content.ReadAsStringAsync());
         Assert.StartsWith("3.", documento.RootElement.GetProperty("openapi").GetString() ?? string.Empty);
-        Assert.Empty(documento.RootElement.GetProperty("paths").EnumerateObject());
+        var caminhos = documento.RootElement.GetProperty("paths");
+        Assert.Equal(2, caminhos.EnumerateObject().Count());
+        var tarefas = caminhos.GetProperty("/api/tarefas");
+        Assert.True(tarefas.TryGetProperty("get", out _));
+        Assert.True(tarefas.TryGetProperty("post", out _));
+        var tarefa = caminhos.GetProperty("/api/tarefas/{id}");
+        Assert.True(tarefa.TryGetProperty("get", out _));
+        Assert.True(tarefa.TryGetProperty("put", out _));
+        Assert.True(tarefa.TryGetProperty("delete", out _));
     }
 
     [Fact]
