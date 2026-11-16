@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/GestaoTarefas.Api/GestaoTarefas.Api.csproj" />
+    <ProjectReference Include="../../src/GestaoTarefas.Infraestrutura/GestaoTarefas.Infraestrutura.csproj" />
   </ItemGroup>
 
   <ItemGroup>
