@@ -40,6 +40,13 @@ builder.Services.AddCors(opcoes =>
 
 var app = builder.Build();
 
+if (app.Configuration.GetValue<bool>("BancoDeDados:AplicarMigracoesNaInicializacao"))
+{
+    using var escopo = app.Services.CreateScope();
+    var contexto = escopo.ServiceProvider.GetRequiredService<GestaoTarefasContexto>();
+    await contexto.Database.MigrateAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

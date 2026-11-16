@@ -1,0 +1,14 @@
+**/bin
+**/obj
+**/AGENTS.md
+**/.git
+**/.env
+**/.env.*
+**/appsettings.Local.json
+**/appsettings.*.Local.json
+**/*.db*
+**/*.sqlite*
+**/*.pfx
+**/*.p12
+testes
+TestResults

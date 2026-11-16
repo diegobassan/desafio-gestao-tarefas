@@ -1,0 +1,10 @@
+node_modules
+dist
+.angular
+.npm
+coverage
+**/AGENTS.md
+**/.git
+**/.env
+**/.env.*
+**/*.log
