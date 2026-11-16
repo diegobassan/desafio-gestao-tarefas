@@ -1,0 +1,79 @@
+<a class="pular-conteudo" href="#conteudo">Ir para o conteúdo</a>
+<header class="barra-superior">
+  <div class="marca">
+    <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true"><rect width="30" height="30" rx="8" fill="currentColor"/><path d="m8 11 2 2 4-4M17 11h5M8 20l2 2 4-4M17 20h5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Gestão de Tarefas</span>
+  </div>
+</header>
+<main id="conteudo" class="pagina">
+  <div class="cabecalho-pagina">
+    <div><h1>Minhas tarefas</h1><p class="subtitulo">Acompanhe suas tarefas e seus prazos.</p></div>
+    <button type="button" class="botao primario nova-tarefa" [disabled]="ocupado() || formularioAberto()" (click)="novaTarefa()">
+      <span aria-hidden="true">+</span> Nova tarefa
+    </button>
+  </div>
+
+  <form class="painel-filtros" [formGroup]="filtros" (ngSubmit)="aplicarFiltros()" aria-label="Filtrar tarefas">
+    <fieldset [disabled]="ocupado() || formularioAberto()">
+      <legend class="somente-leitor">Filtros de tarefas</legend>
+      <div class="campo filtro-situacao">
+        <label for="filtro-situacao">Situação</label>
+        <select id="filtro-situacao" formControlName="situacao">
+          <option value="">Todas as situações</option>
+          @for (situacao of situacoes; track situacao.valor) { <option [value]="situacao.valor">{{ situacao.rotulo }}</option> }
+        </select>
+      </div>
+      <div class="campo filtro-data">
+        <label for="filtro-data">Data de vencimento</label>
+        <input id="filtro-data" type="date" formControlName="dataVencimento">
+      </div>
+      <button type="submit" class="botao secundario">Aplicar filtros</button>
+      <button type="button" class="botao-texto limpar" (click)="limparFiltros()">Limpar filtros</button>
+    </fieldset>
+  </form>
+
+  @if (mensagemSucesso()) { <p class="mensagem sucesso" role="status">{{ mensagemSucesso() }}</p> }
+  @if (erroOperacao()) { <p class="mensagem erro" role="alert">{{ erroOperacao() }}</p> }
+  @if (carregandoEdicao()) { <p class="aviso-carregamento" role="status">Carregando tarefa para edição…</p> }
+
+  <div class="area-trabalho" [class.com-formulario]="formularioAberto()">
+    @if (formularioAberto()) {
+      <app-tarefa-formulario [tarefa]="tarefaEmEdicao()" [salvando]="salvando()" [erro]="erroFormulario()"
+        (salvar)="salvar($event)" (cancelar)="cancelarEdicao()" />
+    }
+    <section class="lista" aria-label="Tarefas encontradas" [attr.aria-busy]="carregando()">
+      @if (carregando()) {
+        <div class="estado-lista" role="status"><p>Carregando tarefas…</p></div>
+      } @else if (erroLista()) {
+        <div class="estado-lista"><h2>Não foi possível carregar a lista</h2><p role="alert">{{ erroLista() }}</p>
+          <button class="botao secundario" type="button" [disabled]="ocupado() || formularioAberto()" (click)="carregarTarefas()">Tentar novamente</button>
+        </div>
+      } @else if (tarefas().length === 0) {
+        <div class="estado-lista vazio" role="status">
+          <div class="icone-vazio" aria-hidden="true"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="8" y="6" width="20" height="26" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M14 4h8v5h-8z" fill="var(--fundo)" stroke="currentColor" stroke-width="1.6"/><path d="m13 20 3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h2>Nenhuma tarefa encontrada</h2><p>Crie uma nova tarefa ou ajuste os filtros para continuar.</p>
+        </div>
+      } @else {
+        <p class="quantidade" aria-live="polite">{{ tarefas().length === 1 ? '1 tarefa encontrada' : tarefas().length + ' tarefas encontradas' }}</p>
+        <ul class="lista-tarefas">
+          @for (tarefa of tarefas(); track tarefa.id) {
+            <li class="cartao-tarefa">
+              <div class="cabecalho-tarefa">
+                <h2>{{ tarefa.titulo }}</h2>
+                <span class="situacao" [attr.data-situacao]="tarefa.situacao">{{ rotuloSituacao(tarefa.situacao) }}</span>
+              </div>
+              @if (tarefa.descricao) { <p class="descricao">{{ tarefa.descricao }}</p> }
+              <div class="rodape-tarefa">
+                <p class="vencimento"><span>Vencimento</span><time [attr.datetime]="tarefa.dataVencimento">{{ formatarData(tarefa.dataVencimento) }}</time></p>
+                <div class="acoes-tarefa">
+                  <button class="botao-texto" type="button" [disabled]="ocupado() || formularioAberto()" (click)="editar(tarefa)" [attr.aria-label]="'Editar tarefa ' + tarefa.titulo">Editar</button>
+                  <button class="botao-texto excluir" type="button" [disabled]="ocupado() || formularioAberto()" (click)="excluir(tarefa)" [attr.aria-label]="'Excluir tarefa ' + tarefa.titulo">{{ excluindo() === tarefa.id ? 'Excluindo…' : 'Excluir' }}</button>
+                </div>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</main>

@@ -1,0 +1,49 @@
+<section class="painel-editor" aria-labelledby="titulo-formulario">
+  <div class="cabecalho-editor">
+    <h2 id="titulo-formulario">{{ tarefa() ? 'Editar tarefa' : 'Nova tarefa' }}</h2>
+    <button type="button" class="botao-texto" [disabled]="salvando()" (click)="cancelar.emit()" aria-label="Fechar formulário">Fechar</button>
+  </div>
+  <form [formGroup]="formulario" (ngSubmit)="confirmar()" [attr.aria-busy]="salvando()">
+    <fieldset [disabled]="salvando()">
+      <div class="campo">
+        <label for="titulo">Título <span class="obrigatorio">*</span></label>
+        <input #campoTitulo id="titulo" formControlName="titulo" maxlength="150" placeholder="O que precisa ser feito?" required
+          aria-describedby="erro-titulo" [attr.aria-invalid]="formulario.controls.titulo.touched && formulario.controls.titulo.invalid">
+        <div id="erro-titulo" class="validacao" aria-live="polite">
+          @if (formulario.controls.titulo.touched) {
+            @if (formulario.controls.titulo.hasError('required') || formulario.controls.titulo.hasError('pattern')) { <span>Informe o título da tarefa.</span> }
+            @else if (formulario.controls.titulo.hasError('maxlength')) { <span>Use no máximo 150 caracteres.</span> }
+          }
+        </div>
+      </div>
+      <div class="campo">
+        <label for="descricao">Descrição <span class="opcional">opcional</span></label>
+        <textarea id="descricao" rows="4" formControlName="descricao" maxlength="2000" placeholder="Acrescente os detalhes da tarefa."
+          aria-describedby="erro-descricao" [attr.aria-invalid]="formulario.controls.descricao.touched && formulario.controls.descricao.invalid"></textarea>
+        <div id="erro-descricao" class="validacao" aria-live="polite">
+          @if (formulario.controls.descricao.touched && formulario.controls.descricao.hasError('maxlength')) { <span>Use no máximo 2000 caracteres.</span> }
+        </div>
+      </div>
+      <div class="campo">
+        <label for="situacao">Situação</label>
+        <select id="situacao" formControlName="situacao" aria-describedby="ajuda-situacao">
+          @for (situacao of situacoes; track situacao.valor) { <option [value]="situacao.valor">{{ situacao.rotulo }}</option> }
+        </select>
+        <p id="ajuda-situacao" class="ajuda">{{ tarefa() ? 'Selecione a situação atual.' : 'Novas tarefas começam como pendentes.' }}</p>
+      </div>
+      <div class="campo">
+        <label for="data-vencimento">Data de vencimento <span class="obrigatorio">*</span></label>
+        <input id="data-vencimento" type="date" formControlName="dataVencimento" required aria-describedby="erro-vencimento"
+          [attr.aria-invalid]="formulario.controls.dataVencimento.touched && formulario.controls.dataVencimento.invalid">
+        <div id="erro-vencimento" class="validacao" aria-live="polite">
+          @if (formulario.controls.dataVencimento.touched && formulario.controls.dataVencimento.invalid) { <span>Informe a data de vencimento.</span> }
+        </div>
+      </div>
+      @if (erro()) { <p class="mensagem erro" role="alert">{{ erro() }}</p> }
+      <div class="acoes-formulario">
+        <button type="button" class="botao secundario" (click)="cancelar.emit()">Cancelar</button>
+        <button type="submit" class="botao primario">{{ salvando() ? 'Salvando…' : 'Salvar tarefa' }}</button>
+      </div>
+    </fieldset>
+  </form>
+</section>
