@@ -23,12 +23,13 @@ services:
     build:
       context: ./frontend
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     depends_on:
       api:
         condition: service_healthy
     networks:
       - interna
+      - acesso
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--max-time", "5", "http://127.0.0.1:8080/"]
@@ -44,3 +45,5 @@ networks:
   interna:
     driver: bridge
     internal: true
+  acesso:
+    driver: bridge
