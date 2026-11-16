@@ -1,0 +1,47 @@
+services:
+  api:
+    image: docker.io/diegobassan/desafio-gestao-tarefas-api:1.0.0
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__BancoDeDados: Data Source=/dados/gestao-tarefas.db
+      BancoDeDados__AplicarMigracoesNaInicializacao: "true"
+    volumes:
+      - dados-tarefas:/dados
+    networks:
+      - interna
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--max-time", "5", "http://127.0.0.1:8080/api/tarefas"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  frontend:
+    image: docker.io/diegobassan/desafio-gestao-tarefas-frontend:1.0.0
+    ports:
+      - "127.0.0.1:${PORTA_FRONTEND:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - interna
+      - acesso
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--max-time", "5", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  dados-tarefas:
+
+networks:
+  interna:
+    driver: bridge
+    internal: true
+  acesso:
+    driver: bridge
